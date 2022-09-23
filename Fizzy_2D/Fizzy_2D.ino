@@ -21,18 +21,23 @@ uint16_t *framebuffer;
 #define SCR2    (WIDTH*HEIGHT)
 
   uint16_t color565(uint8_t red, uint8_t green, uint8_t blue) { return ((red & 0xF8) << 8) | ((green & 0xFC) << 3) | (blue >> 3); }
+  float randomf(float minf, float maxf) {return minf + (rand()%(1UL << 31))*(maxf - minf) / (1UL << 31);}
   
   float CellVal[SCR2];
   uint8_t Calm = 233;
   int CellIndex = 0;
+  float a, b, c;
     
 void rndrule() {
 
   memset(framebuffer, 0, 2*SCR);
 
   CellIndex = 0;
+  a = randomf(1.9f, 5.5f);
+  b = randomf(1.9f, 5.5f);
+  c = randomf(1.9f, 5.5f);
   Calm = 16 + rand()%233;
-  for (int i = 0; i < SCR2; i++) CellVal[i] = rand()%256;
+  for (int i = 0; i < SCR2; i++) CellVal[i] = randomf(0.0f, 255.0f);
 
 }
 
@@ -72,8 +77,10 @@ void loop() {
 
       CellIndex = (CellIndex+1)%SCR2;
 
-      uint8_t coll = (uint8_t)round(CellVal[CellIndex]*4.7f)%128;
-      framebuffer[(2*i)+(2*j)*ARCADA_TFT_WIDTH] = color565(coll<<1, coll<<2, coll<<3);
+      uint8_t klimp = CellVal[CellIndex]*a;       
+      uint8_t nifna = CellVal[CellIndex]*b;
+      uint8_t blugg = CellVal[CellIndex]*c;
+      framebuffer[(2*i)+(2*j)*ARCADA_TFT_WIDTH] = color565(klimp, nifna, blugg);
 
       int below      = (CellIndex+1)%SCR2;
       int above      = (CellIndex+SCR2-1)%SCR2;
