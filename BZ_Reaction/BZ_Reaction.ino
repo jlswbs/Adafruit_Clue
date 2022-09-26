@@ -35,13 +35,12 @@ void rndrule() {
 
   adjust = randomf(0.75f, 1.35f);
 
-   for (int y = 0; y < HEIGHT; y++) {
-    
+  for (int y = 0; y < HEIGHT; y++) {    
     for (int x = 0; x < WIDTH; x++) {
       
-      a[x][y][p] = (rand()%10)/10.0f;
-      b[x][y][p] = (rand()%10)/10.0f;
-      c[x][y][p] = (rand()%10)/10.0f;
+      a[x][y][p] = randomf(0.0f, 1.0f);
+      b[x][y][p] = randomf(0.0f, 1.0f);
+      c[x][y][p] = randomf(0.0f, 1.0f);
       
     }
   }
@@ -104,9 +103,9 @@ void loop() {
       b[x][y][q] = constrain(c_b + c_b * (c_c - adjust * c_a), 0.0f, 1.0f);
       c[x][y][q] = constrain(c_c + c_c * (c_a - c_b), 0.0f, 1.0f);
     
-      uint8_t l = 255 * a[x][y][q];
-      uint8_t r = 255 * b[x][y][q];
-      uint8_t s = 255 * c[x][y][q];
+      uint8_t l = 255.0f * a[x][y][q];
+      uint8_t r = 255.0f * b[x][y][q];
+      uint8_t s = 255.0f * c[x][y][q];
       framebuffer[(4*y) * ARCADA_TFT_WIDTH + (4*x)] = color565(l, r, s);
     
     }
