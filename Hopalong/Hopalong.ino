@@ -22,27 +22,18 @@ uint16_t *framebuffer;
   #define ITER    10000
 
   long ranfseed;
-  float randf() {return (ranfseed=(ranfseed*1629+1)%1048576)/1048576.0f;}
+  float randomf(float minf, float maxf) {return minf + (rand()%(1UL << 31))*(maxf - minf) / (1UL << 31);}
   float a, b, c, x, y, t;
     
 void rndrule() {
 
   memset(framebuffer, 0, 2*SCR);
 
-  x = 0.1f;
-  y = 0.1f;
-  t = 0.0f;
-  a = 0.0f;
-  b = 0.0f;
-  c = 0.0f;
-
-  ranfseed = 1 + rand()%SCR;
-  
-  float pmax = WIDTH, logpmax = logf(pmax);
-  
-  a = expf(randf()*logpmax);
-  b = expf(randf()*logpmax);
-  c = randf()*pmax; 
+  x = 0.0f;
+  y = 0.0f;
+  a = expf(randomf(0.0f, 1.0f) * logf(WIDTH));
+  b = expf(randomf(0.0f, 1.0f) * logf(WIDTH));
+  c = randomf(0.0f, 1.0f) * WIDTH; 
 
 }
 
@@ -83,12 +74,12 @@ void loop() {
     float nx = x;
     float ny = y;
 
-    t = sqrtf(fabs(b*nx-c));
+    t = sqrtf(fabs(b * nx - c));
     x = ny - ((nx<0) ? t : -t);
     y = a - nx;
 
-    int ax = (WIDTH/2) + (x/2);
-    int ay = (HEIGHT/2) + (y/2);
+    int ax = constrain((WIDTH/2) + x, 0, WIDTH);
+    int ay = constrain((HEIGHT/2) + y, 0, HEIGHT);
       
     if (ax>0 && ax<WIDTH && ay>0 && ay <HEIGHT) framebuffer[ax+ay*ARCADA_TFT_WIDTH] = coll;
 
