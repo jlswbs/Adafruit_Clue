@@ -15,9 +15,10 @@ Adafruit_Arcada arcada;
 
 uint16_t *framebuffer;
 
-#define WIDTH  60
-#define HEIGHT 60
-#define SCR (WIDTH * HEIGHT)
+#define WIDTH   60
+#define HEIGHT  60
+#define SCR     (WIDTH * HEIGHT)
+#define ITER    64
 
 uint16_t color565(uint8_t red, uint8_t green, uint8_t blue) { return ((red & 0xF8) << 8) | ((green & 0xFC) << 3) | (blue >> 3); }
 float randomf(float minf, float maxf) {return minf + (rand()%(1UL << 31))*(maxf - minf) / (1UL << 31);}
@@ -82,6 +83,9 @@ void timestep(float F, float K, float diffU, float diffV) {
          
       U[i][j] += dU[i][j];
       V[i][j] += dV[i][j];
+
+      uint8_t col = 255 * U[i][j];
+      framebuffer[(4*i)+(4*j)*ARCADA_TFT_WIDTH] = color565(col, col, col);
       
     }
   }
@@ -117,16 +121,7 @@ void loop() {
 
   if (arcada.readButtons() & ARCADA_BUTTONMASK_A) rndrule();
 
-  for (int k = 0; k < 64; k++) timestep(paramF, paramK, diffU, diffV);
-  
-  for(int j=0;j<HEIGHT;++j){
-    for(int i=0;i<WIDTH;++i){
-            
-      uint8_t col = 255 * U[i][j];
-      framebuffer[(4*i)+(4*j)*ARCADA_TFT_WIDTH] = color565(col, col, col);        
-    
-    }
-  }
+  for (int k = 0; k < ITER; k++) timestep(paramF, paramK, diffU, diffV);
   
   arcada.blitFrameBuffer(0, 0, true, false);
  
