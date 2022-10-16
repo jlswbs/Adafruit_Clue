@@ -21,7 +21,7 @@ uint16_t *framebuffer;
 
 uint16_t color565(uint8_t red, uint8_t green, uint8_t blue) { return ((red & 0xF8) << 8) | ((green & 0xFC) << 3) | (blue >> 3); }
 
-#define PARTICLES 24
+#define PARTICLES 25
 
   float mindist = 0;
   bool colour = false;
@@ -87,8 +87,8 @@ void loop() {
         if (distance(x[p]-WIDTH, y[p], i, j) < mindist) mindist = distance(x[p]-WIDTH, y[p], i, j);
       }
 
-     uint8_t coll = mindist * 5.8f;
-     if(colour) framebuffer[(2*i)+(2*j)*ARCADA_TFT_WIDTH] = color565(coll<<1, coll<<2, coll<<3);
+     uint8_t coll = 255-(5.4f*mindist);
+     if(colour) framebuffer[(2*i)+(2*j)*ARCADA_TFT_WIDTH] = color565(coll, coll<<1, coll<<2);
      else framebuffer[(2*i)+(2*j)*ARCADA_TFT_WIDTH] = color565(coll, coll, coll);
 
     }
