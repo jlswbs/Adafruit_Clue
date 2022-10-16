@@ -27,10 +27,9 @@ float randomf(float minf, float maxf) {return minf + (rand()%(1UL << 31))*(maxf 
   float diffV = 0.08f;
   float paramF = 0.035f;
   float paramK = 0.06f;
-
+  bool colour = false;
   float U[WIDTH][HEIGHT];
   float V[WIDTH][HEIGHT];
-
   float dU[WIDTH][HEIGHT];
   float dV[WIDTH][HEIGHT];
     
@@ -65,30 +64,23 @@ void timestep(float F, float K, float diffU, float diffV) {
     for (int i = 1; i < WIDTH-1; i++) {
             
       float u = U[i][j];
-      float v = V[i][j];
-          
-      float uvv = u * v * v;     
-       
+      float v = V[i][j];      
+      float uvv = u * v * v;   
       float lapU = (U[i-1][j] + U[i+1][j] + U[i][j-1] + U[i][j+1] - 4.0f * u);
       float lapV = (V[i-1][j] + V[i+1][j] + V[i][j-1] + V[i][j+1] - 4.0f * v);
           
       dU[i][j] = diffU*lapU - uvv + F*(1.0f-u);
       dV[i][j] = diffV*lapV + uvv - (K+F)*v;
-          
-    }
-  }
-      
-  for (int j = 0; j < HEIGHT; j++){   
-    for (int i= 0; i < WIDTH; i++) {
-         
       U[i][j] += dU[i][j];
       V[i][j] += dV[i][j];
 
-      uint8_t col = 255 * U[i][j];
-      framebuffer[(4*i)+(4*j)*ARCADA_TFT_WIDTH] = color565(col, col, col);
-      
+      uint8_t coll = 255.0f * U[i][j];
+      if(colour) framebuffer[(4*i)+(4*j)*ARCADA_TFT_WIDTH] = color565(coll, coll<<1, coll<<2);
+      else framebuffer[(4*i)+(4*j)*ARCADA_TFT_WIDTH] = color565(coll, coll, coll);
+          
     }
   }
+
 }
 
 void setup(void) {
@@ -120,6 +112,7 @@ void setup(void) {
 void loop() {
 
   if (arcada.readButtons() & ARCADA_BUTTONMASK_A) rndrule();
+  if (arcada.readButtons() & ARCADA_BUTTONMASK_B) colour = !colour;
 
   for (int k = 0; k < ITER; k++) timestep(paramF, paramK, diffU, diffV);
   
