@@ -1,4 +1,4 @@
-// Water drops //
+// Chladni patterns //
 
 #include "Adafruit_Arcada.h"
 
@@ -22,8 +22,7 @@ uint16_t *framebuffer;
 #define DROPS   8
 
 uint16_t color565(uint8_t red, uint8_t green, uint8_t blue) { return ((red & 0xF8) << 8) | ((green & 0xFC) << 3) | (blue >> 3); }
-float randomf(float minf, float maxf) {return minf + (rand()%(1UL << 31))*(maxf - minf) / (1UL << 31);}
-  
+
   float p[WIDTH][HEIGHT];
   float v[WIDTH][HEIGHT];
 
@@ -37,9 +36,7 @@ void rndrule(){
       v[x][y] = 0;
     }
   }
-  
-  for (int i = 0; i < DROPS; i++) v[16+rand()%(WIDTH-32)][16+rand()%(HEIGHT-32)] = randomf(0.0f, TWO_PI);
- 
+
 }
 
 void setup(void){
@@ -72,8 +69,13 @@ void loop() {
 
   if (arcada.readButtons() & ARCADA_BUTTONMASK_A) rndrule();
 
-  for (int y = 1; y < HEIGHT-1; y++){
-    for (int x = 1; x < WIDTH-1; x++){
+  int frame = millis() / 32;
+
+  v[WIDTH/2][HEIGHT/2] = 0;
+  p[WIDTH/2][HEIGHT/2] = (sinf(frame * 0.01f) + sinf(frame * 0.1f)) * 8.0f;
+  
+  for (int y = 1; y < HEIGHT-1; y++) {
+    for (int x = 1; x < WIDTH-1; x++) {
       v[x][y] += (p[x-1][y] + p[x+1][y] + p[x][y-1] + p[x][y+1]) * 0.25f - p[x][y];
     }
   }
@@ -81,8 +83,9 @@ void loop() {
   for (int y = 0; y < HEIGHT; y++){
     for (int x = 0; x < WIDTH; x++){
       p[x][y] += v[x][y];
-      uint8_t coll = 255.0f * fabs(constrain(p[x][y], -1.0f, 1.0f));
+      uint8_t coll = 255.0f * fabs(constrain(v[x][y], -1.0f, 1.0f));
       framebuffer[(2*x)+(20+(2*y))*ARCADA_TFT_WIDTH] = color565(coll, coll, coll);
+
     }
   }
 
