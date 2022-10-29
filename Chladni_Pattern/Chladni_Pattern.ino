@@ -19,16 +19,25 @@ uint16_t *framebuffer;
 #define HEIGHT  100
 #define SCR     (WIDTH * HEIGHT)
 #define SCR2    (ARCADA_TFT_WIDTH * ARCADA_TFT_HEIGHT)
-#define DROPS   8
 
 uint16_t color565(uint8_t red, uint8_t green, uint8_t blue) { return ((red & 0xF8) << 8) | ((green & 0xFC) << 3) | (blue >> 3); }
+float randomf(float minf, float maxf) {return minf + (rand()%(1UL << 31))*(maxf - minf) / (1UL << 31);}
 
   float p[WIDTH][HEIGHT];
   float v[WIDTH][HEIGHT];
+  float a = 0.01f;
+  float b = 0.1f;
+  float c = 8.0f;
+  bool colen = false;
+  uint16_t color;
 
 void rndrule(){
 
   memset(framebuffer, 0, 2*SCR2);
+
+  a = randomf(0.005f, 0.099f);
+  b = randomf(0.049f, 0.199f);
+  c = randomf(1.0f, 12.0f);
   
   for (int y = 0; y < HEIGHT; y++){
     for (int x = 0; x < WIDTH; x++){
@@ -65,14 +74,15 @@ void setup(void){
   
 }
 
-void loop() {
+void loop(){
 
   if (arcada.readButtons() & ARCADA_BUTTONMASK_A) rndrule();
+  if (arcada.readButtons() & ARCADA_BUTTONMASK_B) colen = !colen;
 
   int frame = millis() / 32;
 
   v[WIDTH/2][HEIGHT/2] = 0;
-  p[WIDTH/2][HEIGHT/2] = (sinf(frame * 0.01f) + sinf(frame * 0.1f)) * 8.0f;
+  p[WIDTH/2][HEIGHT/2] = (sinf(frame * a) + sinf(frame * b)) * c;
   
   for (int y = 1; y < HEIGHT-1; y++) {
     for (int x = 1; x < WIDTH-1; x++) {
@@ -84,8 +94,9 @@ void loop() {
     for (int x = 0; x < WIDTH; x++){
       p[x][y] += v[x][y];
       uint8_t coll = 255.0f * fabs(constrain(v[x][y], -1.0f, 1.0f));
-      framebuffer[(2*x)+(20+(2*y))*ARCADA_TFT_WIDTH] = color565(coll, coll, coll);
-
+      if (colen) color = color565(coll, coll<<1, coll<<2);
+      else color = color565(coll, coll, coll);
+      framebuffer[(2*x)+(20+(2*y))*ARCADA_TFT_WIDTH] = color;
     }
   }
 
